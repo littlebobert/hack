@@ -1,3 +1,5 @@
+*.egg-info
+filled*.jpg
 # Python
 __pycache__/
 *.py[cod]
@@ -17,4 +19,3 @@ apps/mobile/web-build/
 # Environment files
 .env
 backend/.env
-
