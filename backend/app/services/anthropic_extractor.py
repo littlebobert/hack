@@ -4,13 +4,17 @@ import json
 import logging
 import uuid
 from datetime import datetime
+from pathlib import Path
 from typing import Any
 
-from openai import AsyncOpenAI
+from anthropic import AsyncAnthropic
+from anthropic.types import Message
 from pydantic import ValidationError
 
 from ..config import Settings
 from ..schemas import FieldType, FormDocument
+
+SYSTEM_PROMPT = """You are a meticulous document understanding assistant. Always return machine-consumable JSON that matches the provided schema exactly, and include bounding boxes (normalized 0-1 floats) for every field. Estimate coordinates when in doubt."""
 
 PROMPT_TEMPLATE = """You are an assistant that converts scanned or photographed paper forms into structured JSON.
 Analyze the provided form image and return a JSON object that follows this TypeScript type:
@@ -44,51 +48,79 @@ Guidelines:
 - Ensure the JSON is valid and matches the schema exactly. Do not wrap in markdown."""
 
 
+def _collect_text(response: Message) -> str:
+    parts: list[str] = []
+    for block in response.content:
+        if block.type == "text":
+            parts.append(block.text)
+    return "".join(parts)
+
+
 async def extract_form_from_image(
     image_b64: str,
     file_name: str,
     settings: Settings,
     storage_path: str,
 ) -> FormDocument:
-    client = AsyncOpenAI(
-        api_key=settings.openai_api_key,
-        base_url=str(settings.openai_base_url) if settings.openai_base_url else None,
-    )
+    client = AsyncAnthropic(api_key=settings.anthropic_api_key)
 
-    response = await client.responses.create(
-        model=settings.openai_model,
-        input=[
+    media_type = "image/jpeg"
+    if "." in file_name:
+        ext = file_name.rsplit(".", 1)[-1].lower()
+        if ext in {"png", "webp"}:
+            media_type = f"image/{ext}"
+
+    response = await client.messages.create(
+        model=settings.anthropic_model,
+        max_tokens=4096,
+        system=SYSTEM_PROMPT,
+        messages=[
             {
                 "role": "user",
                 "content": [
-                    {"type": "input_text", "text": PROMPT_TEMPLATE},
+                    {"type": "text", "text": PROMPT_TEMPLATE},
                     {
-                        "type": "input_image",
-                        "image_url": f"data:image/{file_name.split('.')[-1].lower() if '.' in file_name else 'jpeg'};base64,{image_b64}",
-                    }
+                        "type": "image",
+                        "source": {
+                            "type": "base64",
+                            "media_type": media_type,
+                            "data": image_b64,
+                        },
+                    },
                 ],
             }
         ],
-        temperature=0.1,
-        max_output_tokens=2048,
     )
 
-    try:
-        json_payload = response.output_text  # type: ignore[attr-defined]
-    except AttributeError as exc:
-        raise ValueError("Unexpected response format from OpenAI API.") from exc
+    json_payload = _collect_text(response)
+    raw_response_dir = Path("storage/debug")
+    raw_response_dir.mkdir(parents=True, exist_ok=True)
+    response_path = raw_response_dir / f"{uuid.uuid4().hex}_anthropic_raw.json"
+    response_path.write_text(json_payload)
+
+    cleaned_payload = json_payload.strip()
+    if cleaned_payload.startswith("```"):
+        cleaned_payload = cleaned_payload.strip("`")
+        if cleaned_payload.startswith("json"):
+            cleaned_payload = cleaned_payload[4:]
+        cleaned_payload = cleaned_payload.strip()
+    if not cleaned_payload.startswith("{") or not cleaned_payload.endswith("}"):
+        start = cleaned_payload.find("{")
+        end = cleaned_payload.rfind("}")
+        if start != -1 and end != -1:
+            cleaned_payload = cleaned_payload[start : end + 1]
 
     try:
-        parsed: dict[str, Any] = json.loads(json_payload)
+        parsed: dict[str, Any] = json.loads(cleaned_payload)
     except json.JSONDecodeError as exc:
-        raise ValueError(f"Failed to parse JSON from OpenAI response: {exc}") from exc
+        raise ValueError(f"Failed to parse JSON from Anthropic response: {exc}") from exc
 
     parsed.setdefault("form_id", uuid.uuid4().hex)
     parsed.setdefault("title", file_name.rsplit(".", 1)[0] if "." in file_name else file_name)
     parsed.setdefault("description", None)
     parsed.setdefault("version", "1.0.0")
     parsed.setdefault("created_at", datetime.utcnow().isoformat())
-    parsed.setdefault("source_image_url", storage_path)
+    parsed["source_image_url"] = storage_path
 
     fields = parsed.get("fields", [])
     if not isinstance(fields, list):
@@ -125,6 +157,29 @@ async def extract_form_from_image(
                 field["bounding_box"] = normalized_bbox
             except (TypeError, ValueError):
                 field.pop("bounding_box", None)
+                bbox = None
+        else:
+            field.pop("bounding_box", None)
+            bbox = None
+
+        if bbox is None:
+            fallback_height = max(0.03, 1.0 / max(len(fields), 1))
+            fallback_y = min(0.95, index * fallback_height)
+            if field_type == "checkbox":
+                fallback_box = {
+                    "x": 0.72,
+                    "y": fallback_y,
+                    "width": 0.25,
+                    "height": fallback_height,
+                }
+            else:
+                fallback_box = {
+                    "x": 0.5,
+                    "y": fallback_y,
+                    "width": 0.45,
+                    "height": fallback_height,
+                }
+            field["bounding_box"] = fallback_box
 
         normalized_fields.append(field)
 
@@ -133,6 +188,6 @@ async def extract_form_from_image(
     try:
         return FormDocument.model_validate(parsed)
     except ValidationError as exc:
-        logging.exception("Failed to validate OpenAI form payload: %s", exc)
+        logging.exception("Failed to validate Anthropic form payload: %s", exc)
         raise ValueError(f"Form validation failed: {exc}") from exc
 
