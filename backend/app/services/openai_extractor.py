@@ -107,7 +107,7 @@ async def extract_form_from_image(
             field_type = "text"
         field["type"] = field_type
 
-        field["required"] = bool(field.get("required", False))
+        field["required"] = False
         if field_type == "select" and isinstance(field.get("options"), list):
             field["options"] = [str(option) for option in field["options"]]
 
