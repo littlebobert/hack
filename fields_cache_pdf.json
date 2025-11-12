@@ -1,0 +1,132 @@
+[
+  {
+    "field": "name",
+    "type": "text",
+    "x": 80,
+    "y": 678,
+    "font_size": 12
+  },
+  {
+    "field": "date_of_birth",
+    "type": "text",
+    "x": 80,
+    "y": 628,
+    "font_size": 12
+  },
+  {
+    "field": "gender",
+    "type": "checkbox",
+    "options": [
+      {
+        "label": "male",
+        "x": 80,
+        "y": 578
+      },
+      {
+        "label": "female",
+        "x": 150,
+        "y": 578
+      },
+      {
+        "label": "other",
+        "x": 220,
+        "y": 578
+      }
+    ]
+  },
+  {
+    "field": "phone",
+    "type": "text",
+    "x": 80,
+    "y": 528,
+    "font_size": 12
+  },
+  {
+    "field": "address",
+    "type": "text",
+    "x": 80,
+    "y": 478,
+    "font_size": 12
+  },
+  {
+    "field": "reason_for_visit",
+    "type": "text",
+    "x": 80,
+    "y": 418,
+    "font_size": 12
+  },
+  {
+    "field": "ongoing_conditions",
+    "type": "text",
+    "x": 80,
+    "y": 358,
+    "font_size": 12
+  },
+  {
+    "field": "current_medication",
+    "type": "text",
+    "x": 80,
+    "y": 308,
+    "font_size": 12
+  },
+  {
+    "field": "allergies",
+    "type": "text",
+    "x": 80,
+    "y": 258,
+    "font_size": 12
+  },
+  {
+    "field": "smoking",
+    "type": "checkbox",
+    "options": [
+      {
+        "label": "smokes",
+        "x": 80,
+        "y": 208
+      },
+      {
+        "label": "does_not_smoke",
+        "x": 150,
+        "y": 208
+      }
+    ]
+  },
+  {
+    "field": "alcohol",
+    "type": "checkbox",
+    "options": [
+      {
+        "label": "drinks",
+        "x": 80,
+        "y": 158
+      },
+      {
+        "label": "does_not_drink",
+        "x": 150,
+        "y": 158
+      }
+    ]
+  },
+  {
+    "field": "average_sleep_hours",
+    "type": "text",
+    "x": 80,
+    "y": 108,
+    "font_size": 12
+  },
+  {
+    "field": "signature",
+    "type": "text",
+    "x": 80,
+    "y": 58,
+    "font_size": 12
+  },
+  {
+    "field": "date",
+    "type": "text",
+    "x": 250,
+    "y": 58,
+    "font_size": 12
+  }
+]

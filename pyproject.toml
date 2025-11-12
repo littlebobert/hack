@@ -8,7 +8,10 @@ requires-python = ">=3.10"
 dependencies = [
     "openai>=1.50.0",
     "pillow>=10.0.0",
-    "python-dotenv>=1.0.0"
+    "python-dotenv>=1.0.0",
+    "pypdf>=4.0.0",
+    "reportlab>=4.0.0",
+    "pdf2image>=1.16.0"
 ]
 
 [tool.uv]  # uvを使うなら（任意）
@@ -16,6 +19,9 @@ dev-dependencies = [
     "black",
     "ruff",
 ]
+
+[tool.setuptools]
+py-modules = []
 
 [build-system]
 requires = ["setuptools"]
