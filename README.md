@@ -59,3 +59,4 @@ The backend URL defaults to `http://localhost:8000`. Override it via `app.json -
 - Provide a web editing experience for manual corrections.
 - Implement PDF/CSV export based on completed responses.
 - Introduce background job processing and confidence-based review queues for low-accuracy OCR outputs.
+

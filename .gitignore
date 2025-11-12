@@ -1,0 +1,21 @@
+*.egg-info
+filled*.jpg
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+env/
+venv/
+
+# FastAPI storage
+storage/
+
+# Node / Expo
+node_modules/
+apps/mobile/.expo/
+apps/mobile/dist/
+apps/mobile/web-build/
+
+# Environment files
+.env
+backend/.env
