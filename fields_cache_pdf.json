@@ -2,15 +2,15 @@
   {
     "field": "name",
     "type": "text",
-    "x": 80,
-    "y": 678,
+    "x": 43.2,
+    "y": 743.5,
     "font_size": 12
   },
   {
-    "field": "date_of_birth",
+    "field": "dob",
     "type": "text",
-    "x": 80,
-    "y": 628,
+    "x": 43.2,
+    "y": 714.7,
     "font_size": 12
   },
   {
@@ -19,61 +19,61 @@
     "options": [
       {
         "label": "male",
-        "x": 80,
-        "y": 578
+        "x": 43.2,
+        "y": 685.9
       },
       {
         "label": "female",
-        "x": 150,
-        "y": 578
+        "x": 74.4,
+        "y": 685.9
       },
       {
         "label": "other",
-        "x": 220,
-        "y": 578
+        "x": 105.6,
+        "y": 685.9
       }
     ]
   },
   {
     "field": "phone",
     "type": "text",
-    "x": 80,
-    "y": 528,
+    "x": 43.2,
+    "y": 657.1,
     "font_size": 12
   },
   {
     "field": "address",
     "type": "text",
-    "x": 80,
-    "y": 478,
+    "x": 43.2,
+    "y": 628.3,
     "font_size": 12
   },
   {
     "field": "reason_for_visit",
     "type": "text",
-    "x": 80,
-    "y": 418,
+    "x": 43.2,
+    "y": 592.3,
     "font_size": 12
   },
   {
     "field": "ongoing_conditions",
     "type": "text",
-    "x": 80,
-    "y": 358,
+    "x": 43.2,
+    "y": 553.9,
     "font_size": 12
   },
   {
     "field": "current_medication",
     "type": "text",
-    "x": 80,
-    "y": 308,
+    "x": 43.2,
+    "y": 525.1,
     "font_size": 12
   },
   {
     "field": "allergies",
     "type": "text",
-    "x": 80,
-    "y": 258,
+    "x": 43.2,
+    "y": 496.3,
     "font_size": 12
   },
   {
@@ -81,14 +81,14 @@
     "type": "checkbox",
     "options": [
       {
-        "label": "smokes",
-        "x": 80,
-        "y": 208
+        "label": "smoke",
+        "x": 43.2,
+        "y": 457.9
       },
       {
-        "label": "does_not_smoke",
-        "x": 150,
-        "y": 208
+        "label": "do_not_smoke",
+        "x": 74.4,
+        "y": 457.9
       }
     ]
   },
@@ -97,36 +97,36 @@
     "type": "checkbox",
     "options": [
       {
-        "label": "drinks",
-        "x": 80,
-        "y": 158
+        "label": "drink",
+        "x": 43.2,
+        "y": 443.5
       },
       {
-        "label": "does_not_drink",
-        "x": 150,
-        "y": 158
+        "label": "do_not_drink",
+        "x": 74.4,
+        "y": 443.5
       }
     ]
   },
   {
-    "field": "average_sleep_hours",
+    "field": "sleep_hours",
     "type": "text",
-    "x": 80,
-    "y": 108,
+    "x": 43.2,
+    "y": 414.7,
     "font_size": 12
   },
   {
     "field": "signature",
     "type": "text",
-    "x": 80,
-    "y": 58,
+    "x": 43.2,
+    "y": 376.3,
     "font_size": 12
   },
   {
     "field": "date",
     "type": "text",
-    "x": 250,
-    "y": 58,
+    "x": 43.2,
+    "y": 347.5,
     "font_size": 12
   }
 ]
