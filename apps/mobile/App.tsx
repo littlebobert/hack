@@ -1,4 +1,4 @@
-import { ChangeEvent, useMemo, useRef, useState } from "react";
+import { ChangeEvent, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -57,6 +57,10 @@ type ExtractionResponse = {
   document: FormDocument;
 };
 
+type RenderResponse = {
+  image_base64: string;
+};
+
 const queryClient = new QueryClient();
 
 export default function App() {
@@ -76,6 +80,7 @@ function Root() {
   const [submittedData, setSubmittedData] = useState<
     Array<{ id: string; label: string; value: string | boolean }>
   >([]);
+  const [renderedImage, setRenderedImage] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -90,6 +95,7 @@ function Root() {
     onSuccess: (data) => {
       setDocument(data);
       setSubmittedData([]);
+      setRenderedImage(null);
       const defaults = data.fields.reduce<Record<string, string | boolean>>((acc, field) => {
         acc[field.id] = field.type === "checkbox" ? false : "";
         return acc;
@@ -99,6 +105,20 @@ function Root() {
     onError: (error) => {
       console.error(error);
       Alert.alert("Extraction failed", "Unable to process the form. Please try again.");
+    },
+  });
+
+  const renderMutation = useMutation({
+    mutationFn: async (payload: { document: FormDocument; values: Record<string, string | boolean> }) => {
+      const response = await axios.post<RenderResponse>(`${backendUrl}/render`, payload);
+      return response.data.image_base64;
+    },
+    onSuccess: (image) => {
+      setRenderedImage(`data:image/png;base64,${image}`);
+    },
+    onError: (error) => {
+      console.error(error);
+      Alert.alert("Render failed", "Unable to generate the filled form preview.");
     },
   });
 
@@ -192,6 +212,10 @@ function Root() {
       value: formValues[field.id] ?? (field.type === "checkbox" ? false : ""),
     }));
     setSubmittedData(summary);
+    renderMutation.mutate({
+      document,
+      values: { ...formValues },
+    });
   };
 
   const hasSubmission = submittedData.length > 0;
@@ -337,6 +361,15 @@ function Root() {
                 </Text>
               </View>
             ))}
+            {renderMutation.isPending && (
+              <View style={styles.renderLoading}>
+                <ActivityIndicator size="small" color="#312e81" />
+                <Text style={styles.helperText}>Generating filled form preview…</Text>
+              </View>
+            )}
+            {renderedImage && (
+              <Image source={{ uri: renderedImage }} style={styles.renderedImage} resizeMode="contain" />
+            )}
           </View>
         )}
       </ScrollView>
@@ -479,6 +512,16 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: "right",
     color: "#312e81",
+  },
+  renderLoading: {
+    alignItems: "center",
+    gap: 8,
+  },
+  renderedImage: {
+    width: "100%",
+    height: 400,
+    borderRadius: 12,
+    backgroundColor: "#fff",
   },
 });
 

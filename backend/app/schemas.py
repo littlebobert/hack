@@ -51,3 +51,12 @@ class ExtractionRequest(BaseModel):
 class ExtractionResponse(BaseModel):
     document: FormDocument
 
+
+class RenderRequest(BaseModel):
+    document: FormDocument
+    values: dict[str, Any] = Field(default_factory=dict)
+
+
+class RenderResponse(BaseModel):
+    image_base64: str
+

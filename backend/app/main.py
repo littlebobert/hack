@@ -10,8 +10,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from .config import Settings, get_settings
-from .schemas import ExtractionResponse, FormDocument
-from .services.openai_extractor import extract_form_from_image
+from .schemas import ExtractionResponse, RenderRequest, RenderResponse
+from .services.anthropic_extractor import extract_form_from_image
+from .services.renderer import render_filled_form
 
 def configure_cors(app: FastAPI, settings: Settings) -> None:
     app.add_middleware(
@@ -70,4 +71,13 @@ async def extract(
 @app.exception_handler(Exception)
 async def fallback_exception_handler(_, exc: Exception) -> JSONResponse:
     return JSONResponse(status_code=500, content={"detail": str(exc)})
+
+
+@app.post("/render", response_model=RenderResponse)
+async def render_form(request: RenderRequest) -> RenderResponse:
+    try:
+        image_b64 = render_filled_form(request.document, request.values)
+        return RenderResponse(image_base64=image_b64)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
 
