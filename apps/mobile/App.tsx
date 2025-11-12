@@ -1,9 +1,10 @@
-import { ChangeEvent, useRef, useState } from "react";
+import { ChangeEvent, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
   Button,
   Image,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -71,6 +72,10 @@ function Root() {
   const backendUrl = Constants.expoConfig?.extra?.backendUrl ?? "http://localhost:8000";
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [document, setDocument] = useState<FormDocument | null>(null);
+  const [formValues, setFormValues] = useState<Record<string, string | boolean>>({});
+  const [submittedData, setSubmittedData] = useState<
+    Array<{ id: string; label: string; value: string | boolean }>
+  >([]);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -84,6 +89,12 @@ function Root() {
     },
     onSuccess: (data) => {
       setDocument(data);
+      setSubmittedData([]);
+      const defaults = data.fields.reduce<Record<string, string | boolean>>((acc, field) => {
+        acc[field.id] = field.type === "checkbox" ? false : "";
+        return acc;
+      }, {});
+      setFormValues(defaults);
     },
     onError: (error) => {
       console.error(error);
@@ -169,12 +180,34 @@ function Root() {
     event.target.value = "";
   };
 
+  const handleInputChange = (fieldId: string, value: string | boolean) => {
+    setFormValues((prev) => ({ ...prev, [fieldId]: value }));
+  };
+
+  const handleSubmit = () => {
+    if (!document) return;
+    const summary = document.fields.map((field) => ({
+      id: field.id,
+      label: field.label,
+      value: formValues[field.id] ?? (field.type === "checkbox" ? false : ""),
+    }));
+    setSubmittedData(summary);
+  };
+
+  const hasSubmission = submittedData.length > 0;
+
   const renderField = (field: FormField) => {
     switch (field.type) {
       case "checkbox":
+        const isChecked = Boolean(formValues[field.id]);
         return (
           <View key={field.id} style={styles.checkboxContainer}>
-            <View style={styles.checkboxPlaceholder} />
+            <Pressable
+              onPress={() => handleInputChange(field.id, !isChecked)}
+              style={[styles.checkboxPlaceholder, isChecked && styles.checkboxActive]}
+            >
+              {isChecked && <Text style={styles.checkboxMark}>✓</Text>}
+            </Pressable>
             <Text style={styles.fieldLabel}>
               {field.label}
               {field.required ? " *" : ""}
@@ -193,6 +226,8 @@ function Root() {
               numberOfLines={4}
               style={[styles.textInput, styles.textarea]}
               placeholder={field.placeholder ?? "Enter text"}
+              value={String(formValues[field.id] ?? "")}
+              onChangeText={(text) => handleInputChange(field.id, text)}
             />
           </View>
         );
@@ -204,7 +239,9 @@ function Root() {
               {field.required ? " *" : ""}
             </Text>
             <View style={styles.select}>
-              <Text style={styles.selectPlaceholder}>Tap to choose</Text>
+              <Text style={styles.selectPlaceholder}>
+                {String(formValues[field.id] || "Tap to choose")}
+              </Text>
             </View>
             {field.options && field.options.length > 0 && (
               <Text style={styles.helperText}>Options: {field.options.join(", ")}</Text>
@@ -237,6 +274,8 @@ function Root() {
             <TextInput
               style={styles.textInput}
               placeholder={field.placeholder ?? "Enter value"}
+              value={String(formValues[field.id] ?? "")}
+              onChangeText={(text) => handleInputChange(field.id, text)}
             />
           </View>
         );
@@ -283,6 +322,21 @@ function Root() {
             <Text style={styles.formTitle}>{document.title}</Text>
             {document.description && <Text style={styles.helperText}>{document.description}</Text>}
             {document.fields.map(renderField)}
+            <Button title="Submit" onPress={handleSubmit} />
+          </View>
+        )}
+
+        {hasSubmission && (
+          <View style={styles.summaryContainer}>
+            <Text style={styles.summaryTitle}>Submission Preview</Text>
+            {submittedData.map((entry) => (
+              <View key={entry.id} style={styles.summaryRow}>
+                <Text style={styles.summaryLabel}>{entry.label}</Text>
+                <Text style={styles.summaryValue}>
+                  {typeof entry.value === "boolean" ? (entry.value ? "Yes" : "No") : entry.value || "—"}
+                </Text>
+              </View>
+            ))}
           </View>
         )}
       </ScrollView>
@@ -369,6 +423,16 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     borderColor: "#aaa",
     backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  checkboxActive: {
+    backgroundColor: "#4f46e5",
+    borderColor: "#4f46e5",
+  },
+  checkboxMark: {
+    color: "#fff",
+    fontWeight: "700",
   },
   select: {
     borderWidth: 1,
@@ -388,6 +452,33 @@ const styles = StyleSheet.create({
     height: 80,
     borderBottomWidth: 1,
     borderColor: "#999",
+  },
+  summaryContainer: {
+    backgroundColor: "#eef2ff",
+    padding: 16,
+    borderRadius: 12,
+    gap: 12,
+  },
+  summaryTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#312e81",
+  },
+  summaryRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 12,
+  },
+  summaryLabel: {
+    fontWeight: "500",
+    flex: 1,
+    color: "#1e1b4b",
+  },
+  summaryValue: {
+    flex: 1,
+    textAlign: "right",
+    color: "#312e81",
   },
 });
 
