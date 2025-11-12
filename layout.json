@@ -1,0 +1,18 @@
+{
+  "fields": [
+    { "key": "patient.name",  "type": "text",   "page": 0, "x": 120, "y": 160, "size": 12, "bold": true },
+    { "key": "patient.id",    "type": "grid",   "page": 0, "x": 120, "y": 190, "cell_w": 18, "cell_h": 18, "count": 8, "size": 11, "upper": true },
+    { "key": "patient.dob",   "type": "date",   "page": 0, "x": 120, "y": 220, "size": 11, "fmt_in": "YYYY-MM-DD", "fmt_out": "%Y/%m/%d" },
+    { "key": "patient.sex",   "type": "radio",  "page": 0, "options": [
+        {"value": "male",   "x": 320, "y": 220},
+        {"value": "female", "x": 380, "y": 220}
+      ], "mark_size": 12
+    },
+    { "key": "patient.phone", "type": "grid",   "page": 0, "x": 120, "y": 250, "cell_w": 16, "cell_h": 18, "count": 11, "size": 11 },
+    { "key": "patient.address","type":"textbox","page": 0, "rect": [120, 280, 520, 340], "size": 11, "wrap": true, "leading": 1.2 },
+
+    { "key": "symptoms",      "type": "textbox","page": 1, "rect": [90, 160, 520, 320], "size": 11, "wrap": true },
+    { "key": "agree_terms",   "type": "checkbox","page": 1, "x": 95, "y": 360, "mark_size": 12, "style": "check" },
+    { "key": "visit_date",    "type": "date",   "page": 1, "x": 420, "y": 360, "size": 11, "fmt_out": "%Y-%m-%d" }
+  ]
+}
