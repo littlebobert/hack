@@ -1,0 +1,38 @@
+[
+  {
+    "field": "name",
+    "x": 120,
+    "y": 80,
+    "width": 300,
+    "height": 40
+  },
+  {
+    "field": "age",
+    "x": 120,
+    "y": 160,
+    "width": 300,
+    "height": 40
+  },
+  {
+    "field": "gender",
+    "x": 120,
+    "y": 240,
+    "width": 300,
+    "height": 40
+  },
+  {
+    "field": "hobbies",
+    "x": 120,
+    "y": 320,
+    "width": 300,
+    "height": 40
+  },
+  {
+    "field": "other",
+    "x": 120,
+    "y": 400,
+    "width": 300,
+    "height": 40
+  }
+]
+
